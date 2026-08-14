@@ -1,0 +1,14 @@
+{
+  "name": "bridgelink-admin",
+  "version": "1.0.0",
+  "description": "BridgeLink Admin Desktop",
+  "main": "main.js",
+  "author": "BridgeLink",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^36.0.0",
+    "electron-packager": "^17.1.2"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "relay": "wss://relay.bridgelink.click",
+  "passphrase": "changethislater",
+  "device_name": "Jeremy"
+}

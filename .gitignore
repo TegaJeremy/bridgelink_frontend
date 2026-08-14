@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Build output
+build/
+dist/
+*.egg-info/
+
+# Electron packaged apps
+BridgeLinkAdmin-linux-x64/
+BridgeLink-linux-x64/
+*-win32-x64/
+*-darwin-x64/
+release/
+out/
+
+# Machine-specific / generated
+.device_id
+*.log
+
+# Sensitive / local config (uncomment if these hold secrets)
+# config.json
+# .env
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor junk
+.vscode/
+.idea/
+*.swp

