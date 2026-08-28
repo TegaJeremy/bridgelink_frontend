@@ -12,3 +12,7 @@
     "electron-packager": "^17.1.2"
   }
 }
+
+(Optional) show status — if you have a status area, render clipboardStatus:
+
+{clipboardStatus && <span style={{ color: '#ffaa00', fontSize: 12 }}>{clipboardStatus}</span>}
